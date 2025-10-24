@@ -1,0 +1,56 @@
+{
+  "app": {
+    "name": "パルス",
+    "description": "リアルタイムチームコミュニケーション・コラボレーション"
+  },
+  "auth": {
+    "signingIn": "サインイン中...",
+    "signingInDescription": "認証プロセスを完了するまでしばらくお待ちください。",
+    "continueWithGoogle": "Googleでログイン",
+    "secureAuth": "Googleオauth認証によるセキュアな認証",
+    "logout": "ログアウト"
+  },
+  "landing": {
+    "title": "パルス",
+    "subtitle": "プロジェクトを前進させるリアルタイムチームコミュニケーション",
+    "features": {
+      "messaging": {
+        "title": "リアルタイムメッセージング",
+        "description": "チャンネルやダイレクトメッセージでチームとの即座なコミュニケーション。"
+      },
+      "fast": {
+        "title": "超高速",
+        "description": "ワークフローに追いつく最新技術で構築されたスピード重視の設計。"
+      },
+      "collaboration": {
+        "title": "チームコラボレーション",
+        "description": "チャンネルで会話を整理し、チームの目標を一致させます。"
+      }
+    },
+    "cta": {
+      "title": "始める準備はできましたか？",
+      "description": "すでにパルスを使ってより効果的にコラボレーションしている数千のチームに参加しましょう。"
+    }
+  },
+  "chat": {
+    "channels": "チャンネル",
+    "newChannel": "新しいチャンネル",
+    "channelName": "チャンネル名",
+    "channelDescription": "説明（任意）",
+    "create": "作成",
+    "cancel": "キャンセル",
+    "messagePlaceholder": "#{{channelName}}にメッセージ",
+    "noMessages": "まだメッセージがありません",
+    "firstMessage": "最初のメッセージを送信しましょう！",
+    "loadingMessages": "メッセージを読み込み中...",
+    "you": "あなた",
+    "unknownUser": "不明なユーザー"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "settings": "設定",
+    "language": "言語",
+    "japanese": "日本語",
+    "english": "English"
+  }
+}
