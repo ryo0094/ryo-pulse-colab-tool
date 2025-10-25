@@ -1,10 +1,40 @@
 import { useState } from "react";
 import { Hash, Plus, LogOut, ChevronDown, MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Channel } from "@/shared/types";
+import { User } from '@supabase/supabase-js';
+import LanguageToggle from "./LanguageToggle";
 import { authedFetch } from "@/react-app/lib/api";
 
-// ... (rest of imports)
+interface SidebarProps {
+  channels: Channel[];
+  selectedChannel: Channel | null;
+  onChannelSelect: (channel: Channel) => void;
+  onChannelCreate: () => void;
+  user: User;
+}
 
-// ... (inside handleCreateChannel function)
+export default function Sidebar({ 
+  channels, 
+  selectedChannel, 
+  onChannelSelect, 
+  onChannelCreate,
+  user 
+}: SidebarProps) {
+  const { t } = useTranslation();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newChannelName, setNewChannelName] = useState("");
+  const [newChannelDescription, setNewChannelDescription] = useState("");
+
+  const handleLogout = async () => {
+    // No need for authedFetch here, supabase client handles its own auth
+    await supabase.auth.signOut();
+  };
+
+  const handleCreateChannel = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newChannelName.trim()) return;
+
     try {
       const response = await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels`, {
         method: "POST",
@@ -16,6 +46,7 @@ import { authedFetch } from "@/react-app/lib/api";
           description: newChannelDescription.trim() || null,
         }),
       });
+
       if (response.ok) {
         setNewChannelName("");
         setNewChannelDescription("");
