@@ -4,6 +4,7 @@
     "target": "ES2022",
     "module": "ESNext",
     "lib": ["ES2022", "WebWorker"], // Explicitly define lib for workers
+    "moduleResolution": "bundler",
     "types": ["@cloudflare/workers-types"], // Use Cloudflare Worker specific types
     "isolatedModules": true,
     "esModuleInterop": true,
