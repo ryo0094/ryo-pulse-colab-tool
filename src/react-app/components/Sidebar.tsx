@@ -177,6 +177,11 @@ export default function Sidebar({
           </div>
         </div>
       </div>
+
+      {/* DEBUG: Show API URL */}
+      <div className="p-2 border-t border-gray-700">
+        <p className="text-xs text-gray-500 truncate">API: {import.meta.env.VITE_API_BASE_URL || 'NOT SET'}</p>
+      </div>
     </div>
   );
 }
