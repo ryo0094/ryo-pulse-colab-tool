@@ -1,15 +1,19 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { jwt } from 'hono/jwt';
-import postgres from 'postgres';
+import postgres, { Sql } from 'postgres';
 
 type Env = {
   DATABASE_URL: string;
-  MOCHA_USERS_SERVICE_API_URL: string;
-  MOCHA_USERS_SERVICE_API_KEY: string;
+  SUPABASE_JWT_SECRET: string;
 };
 
-const app = new Hono<{ Bindings: Env }>();
+type Variables = {
+  sql: Sql;
+  user: { id: string };
+}
+
+const app = new Hono<{ Bindings: Env, Variables: Variables }>();
 
 app.use('/api/*', async (c, next) => {
   const sql = postgres(c.env.DATABASE_URL);
