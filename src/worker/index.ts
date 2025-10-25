@@ -15,6 +15,12 @@ type Variables = {
 
 const app = new Hono<{ Bindings: Env, Variables: Variables }>();
 
+// Enable CORS for all routes. This must come before any other middleware.
+app.use("*", cors({
+  origin: ["http://localhost:5173", "https://ryo-pulse-colab-tool.vercel.app"],
+}));
+
+// Authentication and DB middleware for API routes
 app.use('/api/*', async (c, next) => {
   const sql = postgres(c.env.DATABASE_URL);
   c.set('sql', sql);
@@ -25,17 +31,6 @@ app.use('/api/*', async (c, next) => {
 
   return jwtMiddleware(c, next);
 });
-
-app.use('/api/*', async (c, next) => {
-  const payload = c.get('jwtPayload');
-  c.set('user', { id: payload.sub });
-  await next();
-});
-
-// Enable CORS for all routes
-app.use("*", cors({
-  origin: ["http://localhost:5173", "https://pulse-colab.vercel.app"],
-}));
 
 
 
