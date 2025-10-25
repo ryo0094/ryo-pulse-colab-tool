@@ -5,6 +5,7 @@ import { Channel } from "@/shared/types";
 import { User } from '@supabase/supabase-js';
 import LanguageToggle from "./LanguageToggle";
 import { authedFetch } from "@/react-app/lib/api";
+import { supabase } from "@/react-app/lib/supabaseClient"; // Added this line
 
 interface SidebarProps {
   channels: Channel[];
@@ -27,7 +28,6 @@ export default function Sidebar({
   const [newChannelDescription, setNewChannelDescription] = useState("");
 
   const handleLogout = async () => {
-    // No need for authedFetch here, supabase client handles its own auth
     await supabase.auth.signOut();
   };
 

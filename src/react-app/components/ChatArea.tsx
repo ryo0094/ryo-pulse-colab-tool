@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Hash } from "lucide-react";
+import { Send, Hash, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Channel, Message } from "@/shared/types";
-import { User } from '@supabase/supabase-js';
+import { User } from "@supabase/supabase-js";
 import MessageList from "./MessageList";
+import { authedFetch } from "@/react-app/lib/api";
 
 interface ChatAreaProps {
   channel: Channel;
@@ -30,12 +31,6 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
-import { authedFetch } from "@/react-app/lib/api";
-
-// ... (rest of imports)
-
-// ... (inside ChatArea component)
 
   const fetchMessages = async () => {
     setIsLoading(true);

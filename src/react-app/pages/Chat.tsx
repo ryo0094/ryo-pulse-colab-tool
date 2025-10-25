@@ -4,6 +4,7 @@ import { useAuth } from "@/react-app/contexts/AuthContext";
 import Sidebar from "@/react-app/components/Sidebar";
 import ChatArea from "@/react-app/components/ChatArea";
 import { Channel } from "@/shared/types";
+import { authedFetch } from "@/react-app/lib/api";
 
 export default function Chat() {
   const { user } = useAuth();
@@ -46,11 +47,6 @@ export default function Chat() {
     }
   }, [channels, channelId, selectedChannel, navigate]);
 
-import { authedFetch } from "@/react-app/lib/api";
-
-// ... (rest of imports)
-
-// ... (inside fetchChannels function)
   const fetchChannels = async () => {
     try {
       const response = await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels`);
