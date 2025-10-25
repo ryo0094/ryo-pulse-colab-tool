@@ -20,20 +20,27 @@ app.use("*", cors({
   origin: ["http://localhost:5173", "https://ryo-pulse-colab-tool.vercel.app"],
 }));
 
-// 2. Database connection for API requests
+// 2. Combined middleware for all API routes
 app.use('/api/*', async (c, next) => {
+  // a. Initialize DB connection for this request
   const sql = postgres(c.env.DATABASE_URL);
   c.set('sql', sql);
-  await next();
-});
 
-// 3. JWT authentication for API requests
-app.use('/api/*', jwt({ secret: c.env.SUPABASE_JWT_SECRET }));
+  // b. Define and execute JWT authentication
+  const jwtMiddleware = jwt({
+    secret: c.env.SUPABASE_JWT_SECRET, // `c` is available here, so this is correct
+  });
+  const authResponse = await jwtMiddleware(c, async () => {}); // Run auth middleware
+  if (authResponse) {
+    // If JWT middleware returns a response (e.g., 401 Unauthorized), stop and return it
+    return authResponse;
+  }
 
-// 4. User identification for API requests
-app.use('/api/*', async (c, next) => {
+  // c. If auth succeeded, set the user variable from the JWT payload
   const payload = c.get('jwtPayload');
   c.set('user', { id: payload.sub });
+
+  // d. Proceed to the actual route handler (e.g., app.get('/api/channels'))
   await next();
 });
 
@@ -66,7 +73,8 @@ app.post("/api/channels", async (c) => {
 
     return c.json(channel, 201);
   } catch (error) {
-    return c.json({ error: "Channel name already exists" }, 409);
+    console.error(error);
+    return c.json({ error: "Channel name already exists or another database error occurred." }, 409);
   }
 });
 
@@ -99,18 +107,23 @@ app.post("/api/channels/:channelId/messages", async (c) => {
     return c.json({ error: "Message content is required" }, 400);
   }
 
-  const [message] = await sql`
-    INSERT INTO messages (channel_id, user_id, content, created_at, updated_at) 
-    VALUES (${channelId}, ${user.id}, ${content.trim()}, NOW(), NOW())
-    RETURNING *
-  `;
+  try {
+    const [message] = await sql`
+      INSERT INTO messages (channel_id, user_id, content, created_at, updated_at) 
+      VALUES (${channelId}, ${user.id}, ${content.trim()}, NOW(), NOW())
+      RETURNING *
+    `;
 
-  const [userData] = await sql`SELECT raw_user_meta_data FROM auth.users WHERE id = ${user.id}::uuid`;
+    const [userData] = await sql`SELECT raw_user_meta_data FROM auth.users WHERE id = ${user.id}::uuid`;
 
-  return c.json({
-    ...message,
-    user_data: userData.raw_user_meta_data
-  }, 201);
+    return c.json({
+      ...message,
+      user_data: userData.raw_user_meta_data
+    }, 201);
+  } catch (error) {
+    console.error(error);
+    return c.json({ error: "Failed to send message." }, 500);
+  }
 });
 
 export default app;
