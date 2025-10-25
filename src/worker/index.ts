@@ -15,23 +15,27 @@ type Variables = {
 
 const app = new Hono<{ Bindings: Env, Variables: Variables }>();
 
-// Enable CORS for all routes. This must come before any other middleware.
+// 1. CORS for all requests
 app.use("*", cors({
   origin: ["http://localhost:5173", "https://ryo-pulse-colab-tool.vercel.app"],
 }));
 
-// Authentication and DB middleware for API routes
+// 2. Database connection for API requests
 app.use('/api/*', async (c, next) => {
   const sql = postgres(c.env.DATABASE_URL);
   c.set('sql', sql);
-
-  const jwtMiddleware = jwt({
-    secret: c.env.SUPABASE_JWT_SECRET,
-  });
-
-  return jwtMiddleware(c, next);
+  await next();
 });
 
+// 3. JWT authentication for API requests
+app.use('/api/*', jwt({ secret: c.env.SUPABASE_JWT_SECRET }));
+
+// 4. User identification for API requests
+app.use('/api/*', async (c, next) => {
+  const payload = c.get('jwtPayload');
+  c.set('user', { id: payload.sub });
+  await next();
+});
 
 
 app.get('/', (c) => c.text('Pulse Colab Worker is online!'));
@@ -75,7 +79,7 @@ app.get("/api/channels/:channelId/messages", async (c) => {
   const messages = await sql`
     SELECT m.*, u.raw_user_meta_data as user_data
     FROM messages m
-    LEFT JOIN auth.users u ON m.user_id = u.id
+    LEFT JOIN auth.users u ON m.user_id = u.id::text
     WHERE m.channel_id = ${channelId}
     ORDER BY m.created_at DESC
     LIMIT ${limit}
@@ -101,7 +105,7 @@ app.post("/api/channels/:channelId/messages", async (c) => {
     RETURNING *
   `;
 
-  const [userData] = await sql`SELECT raw_user_meta_data FROM auth.users WHERE id = ${user.id}`;
+  const [userData] = await sql`SELECT raw_user_meta_data FROM auth.users WHERE id = ${user.id}::uuid`;
 
   return c.json({
     ...message,
