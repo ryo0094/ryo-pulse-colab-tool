@@ -11,10 +11,16 @@ export default function Chat() {
   const { channelId } = useParams();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
-      navigate("/");
+      const timer = setTimeout(() => {
+        if (!user) navigate("/");
+      }, 1000); // Wait a moment for auth session to load
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoading(false);
     }
   }, [user, navigate]);
 
@@ -58,7 +64,15 @@ export default function Chat() {
     navigate(`/chat/${channel.id}`);
   };
 
-  
+  if (isLoading || !user) {
+    return (
+      <div className="h-screen bg-gray-900 flex items-center justify-center">
+        <div className="animate-pulse">
+          <div className="w-16 h-16 bg-gray-700 rounded-full"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex bg-gray-900">

@@ -7,6 +7,10 @@ import { MessageCircle, Zap, Users, Shield } from "lucide-react";
 import LanguageToggle from "@/react-app/components/LanguageToggle";
 
 export default function Home() {
+  const { user } = useAuth();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
   const handleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -15,8 +19,6 @@ export default function Home() {
       }
     });
   };
-  const { t } = useTranslation();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {

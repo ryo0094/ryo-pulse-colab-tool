@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Hash, Plus, LogOut, ChevronDown, MessageCircle } from "lucide-react";
-import { useAuth } from "@/react-app/contexts/AuthContext";
 import { supabase } from "@/react-app/lib/supabaseClient";
 import { useTranslation } from "react-i18next";
 import { Channel } from "@/shared/types";
 import { User } from '@supabase/supabase-js';
+import LanguageToggle from "./LanguageToggle";
 
 interface SidebarProps {
   channels: Channel[];
@@ -21,13 +21,14 @@ export default function Sidebar({
   onChannelCreate,
   user 
 }: SidebarProps) {
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
   const { t } = useTranslation();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newChannelName, setNewChannelName] = useState("");
   const [newChannelDescription, setNewChannelDescription] = useState("");
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   const handleCreateChannel = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,7 +59,7 @@ export default function Sidebar({
   };
 
   const getDisplayName = (user: User) => {
-    return user.user_metadata.full_name || user.email.split('@')[0];
+    return user.user_metadata.full_name || (user.email || '').split('@')[0];
   };
 
   return (

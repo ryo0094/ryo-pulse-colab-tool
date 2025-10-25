@@ -1,12 +1,12 @@
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Message } from "@/shared/types";
-import type { MochaUser } from "@getmocha/users-service/shared";
+import { User } from '@supabase/supabase-js';
 
 interface MessageListProps {
   messages: Message[];
   isLoading: boolean;
-  currentUser: MochaUser;
+  currentUser: User;
 }
 
 export default function MessageList({ messages, isLoading, currentUser }: MessageListProps) {
@@ -43,7 +43,7 @@ export default function MessageList({ messages, isLoading, currentUser }: Messag
 
   const getAvatarUrl = (message: Message) => {
     if (message.user_id === currentUser.id) {
-      return currentUser.google_user_data.picture;
+      return currentUser.user_metadata.picture;
     }
     return message.user_data?.picture;
   };
