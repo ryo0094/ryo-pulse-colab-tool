@@ -16,6 +16,7 @@ export default function Home() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -27,6 +28,7 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setNeedsConfirmation(false);
 
     const { error: authError } = isSignUp
       ? await supabase.auth.signUp({ email, password })
@@ -34,9 +36,8 @@ export default function Home() {
 
     if (authError) {
       setError(authError.message);
-    } else {
-      // Supabase automatically handles session after successful auth
-      // The useEffect above will navigate to /chat
+    } else if (isSignUp) {
+      setNeedsConfirmation(true);
     }
     setLoading(false);
   };
@@ -95,46 +96,50 @@ export default function Home() {
               {t('landing.cta.description')}
             </p>
             
-            <form onSubmit={handleAuth} className="space-y-4">
-              {error && <p className="text-red-400 text-sm">{error}</p>}
-              <input
-                type="email"
-                placeholder={t('auth.emailPlaceholder')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <input
-                type="password"
-                placeholder={t('auth.passwordPlaceholder')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  onClick={() => setIsSignUp(true)}
-                  disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading && isSignUp ? t('auth.signingUp') : t('auth.signUp')}
-                </button>
-                <button
-                  type="submit"
-                  onClick={() => setIsSignUp(false)}
-                  disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading && !isSignUp ? t('auth.loggingIn') : t('auth.logIn')}
-                </button>
-              </div>
-            </form>
+            {needsConfirmation ? (
+              <p className="text-green-400 text-lg mb-4">{t('auth.checkEmailForConfirmation')}</p>
+            ) : (
+              <form onSubmit={handleAuth} className="space-y-4">
+                {error && <p className="text-red-400 text-sm">{error}</p>}
+                <input
+                  type="email"
+                  placeholder={t('auth.emailPlaceholder')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder={t('auth.passwordPlaceholder')}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <div className="flex space-x-4">
+                  <button
+                    type="submit"
+                    onClick={() => setIsSignUp(true)}
+                    disabled={loading}
+                    className="flex-1 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading && isSignUp ? t('auth.signingUp') : t('auth.signUp')}
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={() => setIsSignUp(false)}
+                    disabled={loading}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading && !isSignUp ? t('auth.loggingIn') : t('auth.logIn')}
+                  </button>
+                </div>
+              </form>
+            )}
 
             <p className="text-sm text-indigo-300 mt-4">
-              {t('auth.secureAuth')}
+              {t('auth.secureAuthNotice')}
             </p>
           </div>
         </div>

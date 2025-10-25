@@ -6,8 +6,14 @@
   "auth": {
     "signingIn": "Signing you in...",
     "signingInDescription": "Just a moment while we complete the authentication process.",
-    "continueWithGoogle": "Continue with Google",
-    "secureAuth": "Secure authentication powered by Google OAuth",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "signUp": "Sign Up",
+    "signingUp": "Signing Up...",
+    "logIn": "Log In",
+    "loggingIn": "Logging In...",
+    "secureAuthNotice": "Secure and reliable authentication.",
+    "checkEmailForConfirmation": "Sign up successful! Please check your email for a confirmation link.",
     "logout": "Logout"
   },
   "landing": {

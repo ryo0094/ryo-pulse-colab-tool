@@ -6,8 +6,14 @@
   "auth": {
     "signingIn": "サインイン中...",
     "signingInDescription": "認証プロセスを完了するまでしばらくお待ちください。",
-    "continueWithGoogle": "Googleでログイン",
-    "secureAuth": "Googleオauth認証によるセキュアな認証",
+    "emailPlaceholder": "メールアドレスを入力",
+    "passwordPlaceholder": "パスワードを入力",
+    "signUp": "新規登録",
+    "signingUp": "登録中...",
+    "logIn": "ログイン",
+    "loggingIn": "ログイン中...",
+    "secureAuthNotice": "安全で信頼性の高い認証。",
+    "checkEmailForConfirmation": "登録が完了しました！確認リンクのためにメールをチェックしてください。",
     "logout": "ログアウト"
   },
   "landing": {
