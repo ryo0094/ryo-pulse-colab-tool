@@ -31,11 +31,16 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+import { authedFetch } from "@/react-app/lib/api";
+
+// ... (rest of imports)
+
+// ... (inside ChatArea component)
+
   const fetchMessages = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels/${channel.id}/messages`, {
-      });
+      const response = await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels/${channel.id}/messages`);
       if (response.ok) {
         const messagesData = await response.json();
         setMessages(messagesData);
@@ -55,12 +60,11 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
     setNewMessage("");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels/${channel.id}/messages`, {
+      const response = await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels/${channel.id}/messages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
           content: messageContent,
         }),

@@ -46,11 +46,14 @@ export default function Chat() {
     }
   }, [channels, channelId, selectedChannel, navigate]);
 
+import { authedFetch } from "@/react-app/lib/api";
+
+// ... (rest of imports)
+
+// ... (inside fetchChannels function)
   const fetchChannels = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels`, {
-        credentials: "include"
-      });
+      const response = await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels`);
       if (response.ok) {
         const channelsData = await response.json();
         setChannels(channelsData);

@@ -35,7 +35,6 @@ app.use('/api/*', async (c, next) => {
 // Enable CORS for all routes
 app.use("*", cors({
   origin: ["http://localhost:5173", "https://pulse-colab.vercel.app"],
-  credentials: true,
 }));
 
 
