@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Hash, Loader2 } from "lucide-react";
+import { Send, Hash } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Channel, Message } from "@/shared/types";
 import { User } from "@supabase/supabase-js";
