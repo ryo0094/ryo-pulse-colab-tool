@@ -84,8 +84,22 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
     if (!file) return;
     setIsUploading(true);
     try {
+      const sanitizeFileName = (name: string) => {
+        const dotIdx = name.lastIndexOf('.');
+        const base = dotIdx > 0 ? name.slice(0, dotIdx) : name;
+        const ext = dotIdx > 0 ? name.slice(dotIdx) : '';
+        const cleanedBase = base
+          .normalize('NFKD')
+          .replace(/[^a-zA-Z0-9-_]+/g, '_')
+          .replace(/_+/g, '_')
+          .replace(/^_+|_+$/g, '');
+        const cleaned = `${cleanedBase || 'file'}${ext.replace(/[^a-zA-Z0-9.]+/g, '')}`;
+        return cleaned.slice(0, 200);
+      };
+
+      const safeName = sanitizeFileName(file.name);
       const timestamp = Date.now();
-      const path = `${channel.id}/${user.id}/${timestamp}-${file.name}`;
+      const path = `${channel.id}/${user.id}/${timestamp}-${safeName}`;
       const { error: uploadError } = await supabase.storage.from('uploads').upload(path, file, {
         upsert: false,
         contentType: file.type,

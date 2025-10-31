@@ -1,62 +1,66 @@
 {
-  "app": {
-    "name": "Pulse",
-    "description": "Real-time team communication and collaboration"
-  },
-  "auth": {
-    "signingIn": "Signing you in...",
-    "signingInDescription": "Just a moment while we complete the authentication process.",
-    "emailPlaceholder": "Enter your email",
-    "passwordPlaceholder": "Enter your password",
-    "signUp": "Sign Up",
-    "signingUp": "Signing Up...",
-    "logIn": "Log In",
-    "loggingIn": "Logging In...",
-    "secureAuthNotice": "Secure and reliable authentication.",
-    "checkEmailForConfirmation": "Sign up successful! Please check your email for a confirmation link.",
-    "logout": "Logout"
-  },
-  "landing": {
-    "title": "Pulse",
-    "subtitle": "Real-time team communication that keeps your projects moving forward",
-    "features": {
-      "messaging": {
-        "title": "Real-time Messaging",
-        "description": "Instant communication with your team across channels and direct messages."
-      },
-      "fast": {
-        "title": "Lightning Fast",
-        "description": "Built for speed with modern technology that keeps up with your workflow."
-      },
-      "collaboration": {
-        "title": "Team Collaboration",
-        "description": "Organize conversations by channels and keep your team aligned on goals."
-      }
+    "app": {
+        "name": "Pulse",
+        "description": "Real-time team communication and collaboration"
     },
-    "cta": {
-      "title": "Ready to get started?",
-      "description": "Join thousands of teams already using Pulse to collaborate more effectively."
+    "auth": {
+        "signingIn": "Signing you in...",
+        "signingInDescription": "Just a moment while we complete the authentication process.",
+        "emailPlaceholder": "Enter your email",
+        "passwordPlaceholder": "Enter your password",
+        "signUp": "Sign Up",
+        "signingUp": "Signing Up...",
+        "logIn": "Log In",
+        "loggingIn": "Logging In...",
+        "secureAuthNotice": "Secure and reliable authentication.",
+        "checkEmailForConfirmation": "Sign up successful! Please check your email for a confirmation link.",
+        "logout": "Logout"
+    },
+    "landing": {
+        "title": "Pulse",
+        "subtitle": "Real-time team communication that keeps your projects moving forward",
+        "features": {
+            "messaging": {
+                "title": "Real-time Messaging",
+                "description": "Instant communication with your team across channels and direct messages."
+            },
+            "fast": {
+                "title": "Lightning Fast",
+                "description": "Built for speed with modern technology that keeps up with your workflow."
+            },
+            "collaboration": {
+                "title": "Team Collaboration",
+                "description": "Organize conversations by channels and keep your team aligned on goals."
+            }
+        },
+        "cta": {
+            "title": "Ready to get started?",
+            "description": "Join thousands of teams already using Pulse to collaborate more effectively."
+        }
+    },
+    "chat": {
+        "channels": "Channels",
+        "newChannel": "New Channel",
+        "channelName": "Channel name",
+        "channelDescription": "Description (optional)",
+        "create": "Create",
+        "cancel": "Cancel",
+        "messagePlaceholder": "Message #{{channelName}}",
+        "noMessages": "No messages yet",
+        "firstMessage": "Be the first to send a message!",
+        "loadingMessages": "Loading messages...",
+        "you": "You",
+        "unknownUser": "Unknown User",
+        "addReaction": "Add Reaction",
+        "removeReaction": "Remove Reaction",
+        "uploadFile": "Upload file",
+        "attachment": "Attachment"
+    },
+    "common": {
+        "loading": "Loading...",
+        "settings": "Settings",
+        "language": "Language",
+        "japanese": "日本語",
+        "english": "English"
     }
-  },
-  "chat": {
-    "channels": "Channels",
-    "newChannel": "New Channel",
-    "channelName": "Channel name",
-    "channelDescription": "Description (optional)",
-    "create": "Create",
-    "cancel": "Cancel",
-    "messagePlaceholder": "Message #{{channelName}}",
-    "noMessages": "No messages yet",
-    "firstMessage": "Be the first to send a message!",
-    "loadingMessages": "Loading messages...",
-    "you": "You",
-    "unknownUser": "Unknown User"
-  },
-  "common": {
-    "loading": "Loading...",
-    "settings": "Settings",
-    "language": "Language",
-    "japanese": "日本語",
-    "english": "English"
-  }
 }
