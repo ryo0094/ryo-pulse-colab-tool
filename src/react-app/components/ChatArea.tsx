@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Hash } from "lucide-react";
+import { Send, Hash, Paperclip, Smile } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Channel, Message } from "@/shared/types";
 import { User } from "@supabase/supabase-js";
 import MessageList from "./MessageList";
 import { authedFetch } from "@/react-app/lib/api";
+import { supabase } from "@/react-app/lib/supabaseClient";
+import EmojiPicker from "./EmojiPicker";
 
 interface ChatAreaProps {
   channel: Channel;
@@ -16,6 +18,8 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,6 +79,46 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
     }
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const timestamp = Date.now();
+      const path = `${channel.id}/${user.id}/${timestamp}-${file.name}`;
+      const { error: uploadError } = await supabase.storage.from('uploads').upload(path, file, {
+        upsert: false,
+        contentType: file.type,
+      });
+      if (uploadError) throw uploadError;
+
+      const { data: pub } = supabase.storage.from('uploads').getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+
+      const response = await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/channels/${channel.id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: "",
+          attachment_url: publicUrl,
+          attachment_name: file.name,
+          attachment_type: file.type,
+          attachment_size: file.size,
+        }),
+      });
+      if (response.ok) {
+        const newMessageData = await response.json();
+        setMessages(prev => [...prev, newMessageData]);
+        scrollToBottom();
+      }
+    } catch (err) {
+      console.error('Upload failed', err);
+    } finally {
+      setIsUploading(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
@@ -100,7 +144,19 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
 
       {/* Message input */}
       <div className="border-t border-gray-700 p-4 bg-gray-800">
-        <form onSubmit={handleSendMessage} className="flex space-x-3">
+        <form onSubmit={handleSendMessage} className="relative flex space-x-3">
+          <label className={`flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white px-3 rounded-lg cursor-pointer ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`} title={t('chat.uploadFile') as string}>
+            <Paperclip className="w-5 h-5" />
+            <input type="file" className="hidden" onChange={handleFileChange} disabled={isUploading} />
+          </label>
+          <button
+            type="button"
+            className="bg-gray-700 hover:bg-gray-600 text-white px-3 rounded-lg"
+            onClick={() => setShowEmojiPicker(v => !v)}
+            title={t('chat.addEmoji') as string}
+          >
+            <Smile className="w-5 h-5" />
+          </button>
           <input
             type="text"
             value={newMessage}
@@ -115,6 +171,15 @@ export default function ChatArea({ channel, user }: ChatAreaProps) {
           >
             <Send className="w-5 h-5" />
           </button>
+          {showEmojiPicker && (
+            <EmojiPicker
+              onSelect={(emoji) => {
+                setNewMessage(prev => `${prev}${emoji}`);
+                setShowEmojiPicker(false);
+              }}
+              onClose={() => setShowEmojiPicker(false)}
+            />
+          )}
         </form>
       </div>
     </div>

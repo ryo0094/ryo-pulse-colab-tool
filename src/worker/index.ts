@@ -62,7 +62,7 @@ app.post("/api/channels", async (c) => {
     return c.json({ error: "Channel name is required" }, 400);
   }
 
-  const normalizedName = name.toLowerCase().replace(/[^a-z0-9-_]/g, '-');
+  const normalizedName = name.trim();
   
   try {
     const [channel] = await sql`
@@ -83,6 +83,7 @@ app.get("/api/channels/:channelId/messages", async (c) => {
   const sql = c.get('sql');
   const channelId = c.req.param("channelId");
   const limit = parseInt(c.req.query("limit") || "50");
+  const user = c.get('user');
   
   const messages = await sql`
     SELECT m.*, u.raw_user_meta_data as user_data
@@ -94,23 +95,55 @@ app.get("/api/channels/:channelId/messages", async (c) => {
   `;
 
   // Reverse to show oldest first
-  return c.json(messages.reverse());
+  const messageIds = messages.map((m: any) => m.id);
+  if (messageIds.length === 0) return c.json([]);
+
+  const reactions = await sql`
+    SELECT message_id, emoji, COUNT(*)::int as count,
+           bool_or(user_id::text = ${user.id}) as reacted_by_me
+    FROM reactions
+    WHERE message_id = ANY(${messageIds})
+    GROUP BY message_id, emoji
+  `;
+
+  const msgIdToReactions: Record<number, any[]> = {};
+  for (const r of reactions) {
+    if (!msgIdToReactions[r.message_id]) msgIdToReactions[r.message_id] = [];
+    msgIdToReactions[r.message_id].push({ emoji: r.emoji, count: r.count, reactedByMe: r.reacted_by_me });
+  }
+
+  const enriched = messages.map((m: any) => ({
+    ...m,
+    reactions: msgIdToReactions[m.id] || []
+  })).reverse();
+
+  return c.json(enriched);
 });
 
 app.post("/api/channels/:channelId/messages", async (c) => {
   const sql = c.get('sql');
   const channelId = c.req.param("channelId");
-  const { content } = await c.req.json();
+  const { content, attachment_url, attachment_name, attachment_type, attachment_size } = await c.req.json();
   const user = c.get("user");
   
-  if (!content || content.trim().length === 0) {
-    return c.json({ error: "Message content is required" }, 400);
+  const hasText = typeof content === 'string' && content.trim().length > 0;
+  const hasAttachment = !!attachment_url;
+  if (!hasText && !hasAttachment) {
+    return c.json({ error: "Message must include text or an attachment" }, 400);
   }
 
   try {
     const [message] = await sql`
-      INSERT INTO messages (channel_id, user_id, content, created_at, updated_at) 
-      VALUES (${channelId}, ${user.id}, ${content.trim()}, NOW(), NOW())
+      INSERT INTO messages (
+        channel_id, user_id, content,
+        attachment_url, attachment_name, attachment_type, attachment_size,
+        created_at, updated_at
+      ) 
+      VALUES (
+        ${channelId}, ${user.id}, ${hasText ? content.trim() : null},
+        ${attachment_url || null}, ${attachment_name || null}, ${attachment_type || null}, ${attachment_size ?? null},
+        NOW(), NOW()
+      )
       RETURNING *
     `;
 
@@ -123,6 +156,43 @@ app.post("/api/channels/:channelId/messages", async (c) => {
   } catch (error) {
     console.error(error);
     return c.json({ error: "Failed to send message." }, 500);
+  }
+});
+
+// Toggle reaction on a message
+app.post('/api/messages/:messageId/reactions', async (c) => {
+  const sql = c.get('sql');
+  const user = c.get('user');
+  const messageId = parseInt(c.req.param('messageId'));
+  const { emoji } = await c.req.json();
+
+  if (!emoji || typeof emoji !== 'string') {
+    return c.json({ error: 'Emoji is required' }, 400);
+  }
+
+  try {
+    const existing = await sql`
+      SELECT id FROM reactions WHERE message_id = ${messageId} AND user_id = ${user.id}::uuid AND emoji = ${emoji}
+    `;
+
+    if (existing.length > 0) {
+      await sql`DELETE FROM reactions WHERE id = ${existing[0].id}`;
+    } else {
+      await sql`
+        INSERT INTO reactions (message_id, user_id, emoji) VALUES (${messageId}, ${user.id}::uuid, ${emoji})
+      `;
+    }
+
+    // Return latest counts for this message
+    const rows = await sql`
+      SELECT emoji, COUNT(*)::int as count, bool_or(user_id::text = ${user.id}) as reacted_by_me
+      FROM reactions WHERE message_id = ${messageId}
+      GROUP BY emoji
+    `;
+    return c.json(rows.map((r: any) => ({ emoji: r.emoji, count: r.count, reactedByMe: r.reacted_by_me })));
+  } catch (e) {
+    console.error(e);
+    return c.json({ error: 'Failed to toggle reaction' }, 500);
   }
 });
 

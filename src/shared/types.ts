@@ -16,6 +16,15 @@ export const MessageSchema = z.object({
   content: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
+  attachment_url: z.string().nullable().optional(),
+  attachment_name: z.string().nullable().optional(),
+  attachment_type: z.string().nullable().optional(),
+  attachment_size: z.number().nullable().optional(),
+  reactions: z.array(z.object({
+    emoji: z.string(),
+    count: z.number(),
+    reactedByMe: z.boolean().optional(),
+  })).optional(),
   user_data: z.object({
     email: z.string(),
     email_verified: z.boolean(),

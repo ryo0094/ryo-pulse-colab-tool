@@ -1,7 +1,10 @@
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Message } from "@/shared/types";
 import { User } from '@supabase/supabase-js';
+import { useState } from 'react';
+import { authedFetch } from "@/react-app/lib/api";
+import EmojiPicker from "./EmojiPicker";
 
 interface MessageListProps {
   messages: Message[];
@@ -11,6 +14,7 @@ interface MessageListProps {
 
 export default function MessageList({ messages, isLoading, currentUser }: MessageListProps) {
   const { t } = useTranslation();
+  const [pickerFor, setPickerFor] = useState<number | null>(null);
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -118,6 +122,71 @@ export default function MessageList({ messages, isLoading, currentUser }: Messag
               
               <div className="text-gray-200 break-words whitespace-pre-wrap">
                 {message.content}
+              </div>
+
+              {message.attachment_url && (
+                <div className="mt-2">
+                  {message.attachment_type?.startsWith('image/') ? (
+                    <img
+                      src={message.attachment_url}
+                      alt={message.attachment_name || 'image attachment'}
+                      className="max-w-full rounded-lg border border-gray-700"
+                    />
+                  ) : (
+                    <a
+                      href={message.attachment_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-400 hover:underline break-all"
+                    >
+                      {message.attachment_name || t('chat.attachment')}
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Reactions */}
+              <div className="mt-2 flex items-center gap-2 flex-wrap">
+                {(message.reactions || []).map(r => (
+                  <button
+                    key={r.emoji}
+                    className={`px-2 py-0.5 rounded-full border text-sm flex items-center gap-1 ${r.reactedByMe ? 'bg-blue-900/30 border-blue-600 text-blue-300' : 'border-gray-600 text-gray-300 hover:bg-gray-700'}`}
+                    onClick={async () => {
+                      await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/messages/${message.id}/reactions`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ emoji: r.emoji })
+                      });
+                    }}
+                    title={r.reactedByMe ? t('chat.removeReaction') : t('chat.addReaction')}
+                  >
+                    <span>{r.emoji}</span>
+                    <span className="text-xs">{r.count}</span>
+                  </button>
+                ))}
+                <div className="relative">
+                  <button
+                    className="px-2 py-0.5 rounded-full border border-dashed border-gray-600 text-gray-300 hover:bg-gray-700 text-sm flex items-center gap-1"
+                    onClick={() => setPickerFor(pickerFor === message.id ? null : message.id)}
+                    title={t('chat.addReaction')}
+                  >
+                    <Plus className="w-3 h-3" />
+                    {t('chat.addReaction')}
+                  </button>
+                  {pickerFor === message.id && (
+                    <EmojiPicker
+                      onSelect={async (emoji) => {
+                        setPickerFor(null);
+                        await authedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/messages/${message.id}/reactions`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ emoji })
+                        });
+                      }}
+                      onClose={() => setPickerFor(null)}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>
